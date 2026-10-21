@@ -41,8 +41,8 @@ public class MainMenu extends JFrame {
     }
 
     private void startGame() {
-
-        System.out.println("Play pressed (fullscreen = " + fullscreen + ")");
+        dispose();
+        new Main();
     }
 
     private void continueGame() {
