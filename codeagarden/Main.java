@@ -7,7 +7,9 @@ import javax.swing.*;
 public class Main extends JFrame {
 
     public static void main (String[] args) {
-        SwingUtilities.invokeLater(MainMenu::new);
+        SwingUtilities.invokeLater(() -> {
+            new Main();
+        });
     }
 
     public Main() throws HeadlessException {
