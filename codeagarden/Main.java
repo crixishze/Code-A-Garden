@@ -5,7 +5,6 @@ import java.awt.*;
 import javax.swing.*;
 
 public class Main extends JFrame {
-SwingUtilities.invokeLater(MainMenu::new);
 
     public static void main (String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -14,6 +13,7 @@ SwingUtilities.invokeLater(MainMenu::new);
     }
 
     public Main() throws HeadlessException {
+        SwingUtilities.invokeLater(MainMenu::new);
         setTitle("Code A Garden");
         /*setAppIcon(); */
         setSize(1000, 1000);
