@@ -13,6 +13,7 @@ public class Main extends JFrame {
     }
 
     public Main() throws HeadlessException {
+        SwingUtilities.invokeLater(MainMenu::new);
         setTitle("Code A Garden");
         /*setAppIcon(); */
         setSize(1000, 1000);
