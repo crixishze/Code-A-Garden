@@ -1,9 +1,7 @@
 package codeagarden;
 
-import java.util.*;
 import java.awt.*;
 import javax.swing.*;
-
 
 public class Main extends JFrame {
 
@@ -13,11 +11,11 @@ public class Main extends JFrame {
 
     public Main() throws HeadlessException {
         setTitle("Code A Garden");
-        /*setAppIcon(); */
+        /* setAppIcon(); */
         setSize(1000, 1000);
         setResizable(false);
 
-        //calls FarmPlot class, provides the grid for the plot Row X Column
+        // calls FarmPlot class, provides the grid for the plot Row X Column
         FarmPlot plot = new FarmPlot(10, 10);
         plot.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(plot, BorderLayout.CENTER);
@@ -25,10 +23,20 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //bottombar containing player balance, time left, as well as the shop menu
+        // bottombar containing player balance, time left, as well as the shop menu
         BottomBar botBar = new BottomBar(100);
         add(botBar, BorderLayout.SOUTH);
 
         setVisible(true);
+
+        JButton shopBtn = new JButton("Shop");
+        shopBtn.addActionListener(e -> {
+            JDialog d = new JDialog(this, "Store", true);
+            d.add(new Store());
+            d.setSize(400, 300);
+            d.setLocationRelativeTo(this);
+            d.setVisible(true);
+        });
+        add(shopBtn, BorderLayout.NORTH);
     }
 }
