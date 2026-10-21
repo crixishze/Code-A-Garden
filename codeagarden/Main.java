@@ -1,4 +1,18 @@
+package codeagarden;
 
+import java.util.*;
+import java.awt.*;
+import javax.swing.*;
+
+public class Main extends JFrame {
+
+    public static void main (String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Main();
+        });
+    }
+
+    
 public class Main extends JFrame {
 
     public static void main(String[] args) {
@@ -25,4 +39,7 @@ public class Main extends JFrame {
 
         setVisible(true);
     }
+}
+
+
 }
