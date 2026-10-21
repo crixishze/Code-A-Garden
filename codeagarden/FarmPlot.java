@@ -1,9 +1,7 @@
 package codeagarden;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import java.awt.*;
+import javax.swing.*;
 
 public class FarmPlot extends JPanel {
 
