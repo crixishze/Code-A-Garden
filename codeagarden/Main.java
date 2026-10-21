@@ -5,6 +5,7 @@ import java.awt.*;
 import javax.swing.*;
 
 public class Main extends JFrame {
+SwingUtilities.invokeLater(MainMenu::new);
 
     public static void main (String[] args) {
         SwingUtilities.invokeLater(() -> {
