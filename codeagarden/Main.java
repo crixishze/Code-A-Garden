@@ -7,13 +7,13 @@ import javax.swing.*;
 public class Main extends JFrame {
 
     public static void main (String[] args) {
+        SwingUtilities.invokeLater(MainMenu::new);
         SwingUtilities.invokeLater(() -> {
             new Main();
         });
     }
 
     public Main() throws HeadlessException {
-        SwingUtilities.invokeLater(MainMenu::new);
         setTitle("Code A Garden");
         /*setAppIcon(); */
         setSize(1000, 1000);
