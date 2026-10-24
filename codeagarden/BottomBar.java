@@ -24,4 +24,8 @@ public class BottomBar extends JPanel{
         this.balance = balance;
         balanceLabel.setText("Balance: $" + balance);
     }
+
+    public void addBalance(int amount) {
+        setBalance(balance + amount);
+    }
 }
