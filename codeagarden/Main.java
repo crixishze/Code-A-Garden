@@ -1,11 +1,11 @@
 package codeagarden;
 
-import java.util.*;
 import java.awt.*;
 import javax.swing.*;
 
-
 public class Main extends JFrame {
+
+    private static final int GAME_LENGTH_SECONDS = 15 * 60;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainMenu::new);
@@ -13,22 +13,59 @@ public class Main extends JFrame {
 
     public Main() throws HeadlessException {
         setTitle("Code A Garden");
-        /*setAppIcon(); */
         setSize(1000, 1000);
         setResizable(false);
-
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //bottombar containing player balance, time left, as well as the shop menu
+        CardLayout cards = new CardLayout();
+        JPanel content = new JPanel(cards);
+
+        // bottom bar
+        // balance on the left, timer in the middle, page buttons on the right
         BottomBar botBar = new BottomBar(100);
+        botBar.addNavButton("Shop", () -> cards.show(content, "shop"));
+        botBar.addNavButton("Inventory", () -> cards.show(content, "inventory"));
+        botBar.addNavButton("Farm", () -> cards.show(content, "farm"));
         add(botBar, BorderLayout.SOUTH);
 
-        //calls FarmPlot class, provides the grid for the plot Row X Column
-        FarmPlot plot = new FarmPlot(10, 10, new Seed("Carrot", 10, 3, 20), botBar::addBalance);
+        Inventory inventory = new Inventory();
+
+        FarmPlot plot = new FarmPlot(inventory, botBar::addBalance);
         plot.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        add(plot, BorderLayout.CENTER);
+
+        content.add(plot, "farm");                                   // first card = shown at startup
+        content.add(new Store(botBar, inventory, plot), "shop");
+        content.add(inventory, "inventory");
+        add(content, BorderLayout.CENTER);
+
+        // win when the balance reaches the goal
+        // lose when the timer runs out
+        botBar.setOnGoalReached(() -> endGame("You Win!",
+                "You reached the goal!\nFinal balance: $" + String.format("%,d", botBar.getBalance())));
+        botBar.startTimer(GAME_LENGTH_SECONDS, () -> endGame("Game Over",
+                "Time's up!\nFinal balance: $" + String.format("%,d", botBar.getBalance())));
 
         setVisible(true);
+    }
+
+    private void endGame(String title, String message) {
+        Object[] options = {"Play Again", "Quit"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                message,
+                title,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice == 0) {
+            dispose();
+            new Main(); // restarts game with new balance, empty farm, and new 15 minutes
+        } else {
+            System.exit(0);
+        }
     }
 }
