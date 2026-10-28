@@ -5,7 +5,9 @@ import javax.swing.*;
 
 public class Main extends JFrame {
 
-    private static final int GAME_LENGTH_SECONDS = 15 * 60;
+    // Tuning: 60 real seconds per in-game day, with 30 in-game days total.
+    private static final int SECONDS_PER_GAME_DAY = 60;
+    private static final int TOTAL_GAME_DAYS = 30;
     private InterpreterWindow scriptWindow;
 
     public static void main(String[] args) {
@@ -14,8 +16,9 @@ public class Main extends JFrame {
 
     public Main() throws HeadlessException {
         setTitle("Code A Garden");
-        setSize(1000, 1000);
-        setResizable(false);
+        setSize(1280, 720);                         // default size when the game opens
+        setMinimumSize(new Dimension(1200, 600));   // keeps the bottom bar and a 6x6 farm from getting squashed
+        setResizable(true);                         // needed for the maximize button
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -25,6 +28,13 @@ public class Main extends JFrame {
         // bottom bar
         // balance on the left, timer in the middle, page buttons on the right
         BottomBar botBar = new BottomBar(100);
+        botBar.setReturnToMenuAction(() -> {
+            if (scriptWindow != null) {
+                scriptWindow.shutdown();
+            }
+            dispose();
+            new MainMenu();
+        });
         botBar.addNavButton("Code", () -> {
         scriptWindow.setLocation(getX() + getWidth() + 10, getY());
         scriptWindow.setVisible(true);});
@@ -45,12 +55,13 @@ public class Main extends JFrame {
         scriptWindow = new InterpreterWindow(controller);
         add(content, BorderLayout.CENTER);
 
-        // win when the balance reaches the goal
-        // lose when the timer runs out
+        // Win when the balance reaches $10,000; lose when day 30 ends.
         botBar.setOnGoalReached(() -> endGame("You Win!",
                 "You reached the goal!\nFinal balance: $" + String.format("%,d", botBar.getBalance())));
-        botBar.startTimer(GAME_LENGTH_SECONDS, () -> endGame("Game Over",
-                "Time's up!\nFinal balance: $" + String.format("%,d", botBar.getBalance())));
+        botBar.startDayCounter(SECONDS_PER_GAME_DAY, TOTAL_GAME_DAYS, () -> endGame("Game Over",
+                "You ran out of days!\nYou reached day " + TOTAL_GAME_DAYS
+                        + " without reaching the goal.\nFinal balance: $"
+                        + String.format("%,d", botBar.getBalance())));
 
         setVisible(true);
     }
@@ -70,7 +81,7 @@ public class Main extends JFrame {
         if (choice == 0) {
             scriptWindow.shutdown();
             dispose();
-            new Main(); // restarts game with new balance, empty farm, and new 15 minutes
+            new Main(); // restarts game with new balance, empty farm, and a fresh 30-day season
         } else {
             System.exit(0);
         }

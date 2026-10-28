@@ -8,21 +8,23 @@ import java.awt.image.BufferedImage;
 
 public class MainMenu extends JFrame {
 
-    private static final String BG_PATH     = "/images/background.png";
-    private static final String TITLE_PATH  = "/images/title.png";
-    private static final String BUTTON_PATH = "/images/button.png";
+    private static final String BG_PATH          = "/images/Background1.png";
+    private static final String TITLE_PATH       = "/images/title.png";
+    private static final String NEW_GAME_PATH    = "/images/RoundButton2_white.png";
+    private static final String CONTINUE_PATH    = "/images/RoundButton2_white.png";
+    private static final String EXIT_PATH        = "/images/RoundButton2_wood.png";
 
     private static final Font BUTTON_FONT = loadFont("/fonts/DD.otf", 30f);
     private static final int TEXT_OFFSET_Y = -6;
 
-    private static final Color BUTTON_TEXT_COLOR = Color.WHITE;
-    private static final Dimension MIN_SIZE = new Dimension(2000, 1000);
+    private static final Color NEW_GAME_TEXT_COLOR = new Color(139, 78, 57);
+    private static final Color CONTINUE_TEXT_COLOR = new Color(255, 248, 220);
+    private static final Dimension MIN_SIZE = new Dimension(800, 500);
     private static final Dimension DEFAULT_SIZE = new Dimension(1280, 720);
 
     private static final int   BOUNCE_HEIGHT = 10;
     private static final float BOUNCE_SPEED  = 4f;
-    private static final int BUTTON_WIDTH  = 400;
-    private static final int BUTTON_HEIGHT = 100;
+    private static final int BUTTON_WIDTH  = 360;
     private static final float BUTTON_SIZE = 1f;
     private boolean fullscreen = false;
 
@@ -70,31 +72,48 @@ public class MainMenu extends JFrame {
     private class MenuPanel extends JPanel {
         private final BufferedImage background = loadImage(BG_PATH);
         private final ImageLabel title = new ImageLabel(loadImage(TITLE_PATH));
-        private final MenuButton play, cont;
+        private final MenuButton play, cont, exit;
 
         MenuPanel() {
-            BufferedImage buttonImg = loadImage(BUTTON_PATH);
-            play = new MenuButton(buttonImg, "Play", MainMenu.this::startGame);
-            cont = new MenuButton(buttonImg, "Continue", MainMenu.this::continueGame);
+            play = new MenuButton(loadImage(NEW_GAME_PATH), "NEW GAME",
+                    NEW_GAME_TEXT_COLOR, true, MainMenu.this::startGame);
+            cont = new MenuButton(loadImage(CONTINUE_PATH), "CONTINUE",
+                    NEW_GAME_TEXT_COLOR, true, MainMenu.this::continueGame);
+            exit = new MenuButton(loadImage(EXIT_PATH), "EXIT",
+                    CONTINUE_TEXT_COLOR, true, () -> System.exit(0));
 
             setLayout(new GridBagLayout());
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
             c.gridy = GridBagConstraints.RELATIVE;
-            c.insets = new Insets(0, 0, 40, 0);
+            c.insets = new Insets(0, 0, 12, 0);
             add(title, c);
-            c.insets = new Insets(10, 0, 10, 0);
+            c.insets = new Insets(4, 0, 4, 0);
             add(play, c);
             add(cont, c);
+            add(exit, c);
 
+            // Apply an initial size immediately, then recalculate when the window changes.
+            updateScales(DEFAULT_SIZE.width, DEFAULT_SIZE.height);
             addComponentListener(new ComponentAdapter() {
                 @Override public void componentResized(ComponentEvent e) {
-                    float s = Math.max(0.6f, Math.min(1.6f, getHeight() / 800f));
-                    title.setScale(s);
-                    play.setScale(s * BUTTON_SIZE);
-                    cont.setScale(s * BUTTON_SIZE);
+                    updateScales(getWidth(), getHeight());
                 }
             });
+        }
+
+        private void updateScales(int windowWidth, int windowHeight) {
+            // Reserve space for all three buttons so the complete menu remains visible.
+            float maxTitleWidth = Math.min(800f, windowWidth * 0.72f);
+            float maxTitleHeight = Math.min(220f, windowHeight * 0.30f);
+            float titleScale = Math.min(maxTitleWidth / title.img.getWidth(),
+                                        maxTitleHeight / title.img.getHeight());
+            title.setScale(Math.max(0.1f, titleScale));
+
+            float buttonScale = Math.max(0.40f, Math.min(0.58f, windowHeight / 1200f));
+            play.setScale(buttonScale * BUTTON_SIZE);
+            cont.setScale(buttonScale * BUTTON_SIZE);
+            exit.setScale(buttonScale * BUTTON_SIZE);
         }
 
         @Override protected void paintComponent(Graphics g) {
@@ -130,12 +149,17 @@ public class MainMenu extends JFrame {
         private final float offset = count++ * 0.6f;
         private final BufferedImage image;
         private final String text;
+        private final Color textColor;
+        private final boolean drawText;
         private float scale = 1f;
         private boolean hover, pressed;
- 
-        MenuButton(BufferedImage image, String text, Runnable onClick) {
+
+        MenuButton(BufferedImage image, String text, Color textColor,
+                   boolean drawText, Runnable onClick) {
             this.image = image;
             this.text = text;
+            this.textColor = textColor;
+            this.drawText = drawText;
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             addMouseListener(new MouseAdapter() {
                 @Override public void mouseEntered(MouseEvent e) { hover = true; repaint(); }
@@ -153,9 +177,11 @@ public class MainMenu extends JFrame {
         void setScale(float s) { scale = s; revalidate(); repaint(); }
 
         @Override public Dimension getPreferredSize() {
-            return new Dimension(Math.round(BUTTON_WIDTH * scale) + PAD * 2,
-                                 Math.round(BUTTON_HEIGHT * scale) + PAD * 2);
-}
+            int buttonWidth = Math.round(BUTTON_WIDTH * scale);
+            int buttonHeight = Math.round(buttonWidth
+                    * image.getHeight() / (float) image.getWidth());
+            return new Dimension(buttonWidth + PAD * 2, buttonHeight + PAD * 2);
+        }
 
         @Override protected void paintComponent(Graphics g0) {
             Graphics2D g = (Graphics2D) g0;
@@ -165,7 +191,7 @@ public class MainMenu extends JFrame {
             int hop = (int) (Math.abs(Math.sin(System.currentTimeMillis() / 1000.0 * BOUNCE_SPEED + offset)) * BOUNCE_HEIGHT);
 
             int baseW = getWidth() - 2 * PAD;
-            int baseH = getHeight() - 2 * PAD;
+            int baseH = Math.round(baseW * image.getHeight() / (float) image.getWidth());
 
             float sx = pressed ? 1.04f : (hover ? 1.05f : 1f);
             float sy = pressed ? 0.88f : (hover ? 1.05f : 1f);
@@ -177,31 +203,50 @@ public class MainMenu extends JFrame {
 
             g.drawImage(image, x, y, w, h, null);
 
-            Graphics2D t = (Graphics2D) g.create();
-            t.translate(x + w / 2.0, y + h / 2.0);
-            t.scale(sx, sy);
-            t.setFont(BUTTON_FONT.deriveFont(BUTTON_FONT.getSize2D() * scale));
-            FontMetrics fm = t.getFontMetrics();
-            t.setColor(BUTTON_TEXT_COLOR);
-            t.drawString(text, -fm.stringWidth(text) / 2,
-                 (fm.getAscent() - fm.getDescent()) / 2 + Math.round(TEXT_OFFSET_Y * scale));
-            t.dispose();
+            if (drawText && !text.isEmpty()) {
+                Graphics2D t = (Graphics2D) g.create();
+                t.translate(x + w / 2.0, y + h / 2.0);
+                t.scale(sx, sy);
+                float fontSize = text.equals("NEW GAME") ? 27f : 25f;
+                t.setFont(BUTTON_FONT.deriveFont(fontSize * scale));
+                FontMetrics fm = t.getFontMetrics();
+                t.setColor(textColor);
+                t.drawString(text, -fm.stringWidth(text) / 2,
+                     (fm.getAscent() - fm.getDescent()) / 2
+                             + Math.round(TEXT_OFFSET_Y * scale));
+                t.dispose();
+            }
         }
     }
 
     private static BufferedImage loadImage(String path) {
         try {
-            return ImageIO.read(MainMenu.class.getResource(path));
+            java.net.URL resource = MainMenu.class.getResource(path);
+            if (resource == null) {
+                throw new IllegalArgumentException("Resource not found: " + path
+                        + " (check that it is inside src/main/resources" + path + ")");
+            }
+            BufferedImage image = ImageIO.read(resource);
+            if (image == null) {
+                throw new IllegalArgumentException("Unsupported or invalid image: " + path);
+            }
+            return image;
         } catch (Exception e) {
-            throw new RuntimeException("Could not load " + path, e);
+            throw new RuntimeException("Could not load image resource " + path, e);
         }
     }
 
     private static Font loadFont(String path, float size) {
         try {
-            return Font.createFont(Font.TRUETYPE_FONT, MainMenu.class.getResourceAsStream(path)).deriveFont(size);
+            java.io.InputStream stream = MainMenu.class.getResourceAsStream(path);
+            if (stream == null) {
+                throw new IllegalArgumentException("Font resource not found: " + path);
+            }
+            try (stream) {
+                return Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(size);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Could not load " + path, e);
+            throw new RuntimeException("Could not load font resource " + path, e);
         }
     }
 }
