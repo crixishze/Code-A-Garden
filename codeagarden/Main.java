@@ -6,6 +6,7 @@ import javax.swing.*;
 public class Main extends JFrame {
 
     private static final int GAME_LENGTH_SECONDS = 15 * 60;
+    private InterpreterWindow scriptWindow;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainMenu::new);
@@ -24,6 +25,9 @@ public class Main extends JFrame {
         // bottom bar
         // balance on the left, timer in the middle, page buttons on the right
         BottomBar botBar = new BottomBar(100);
+        botBar.addNavButton("Code", () -> {
+        scriptWindow.setLocation(getX() + getWidth() + 10, getY());
+        scriptWindow.setVisible(true);});
         botBar.addNavButton("Shop", () -> cards.show(content, "shop"));
         botBar.addNavButton("Inventory", () -> cards.show(content, "inventory"));
         botBar.addNavButton("Farm", () -> cards.show(content, "farm"));
@@ -37,6 +41,8 @@ public class Main extends JFrame {
         content.add(plot, "farm");                                   // first card = shown at startup
         content.add(new Store(botBar, inventory, plot), "shop");
         content.add(inventory, "inventory");
+        DroneController controller = new DroneController(plot);
+        scriptWindow = new InterpreterWindow(controller);
         add(content, BorderLayout.CENTER);
 
         // win when the balance reaches the goal
@@ -62,6 +68,7 @@ public class Main extends JFrame {
                 options[0]);
 
         if (choice == 0) {
+            scriptWindow.shutdown();
             dispose();
             new Main(); // restarts game with new balance, empty farm, and new 15 minutes
         } else {

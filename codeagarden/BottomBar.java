@@ -18,7 +18,7 @@ public class BottomBar extends JPanel {
 
     public BottomBar(int balance) {
         this.balance = balance;
-        setLayout(new GridLayout(1, 3)); // three equal columns: balance | timer | buttons
+        setLayout(new BorderLayout()); //changed it so that the interpreter button won't hide from you
         setPreferredSize(new Dimension(1000, 60));
         setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
@@ -29,15 +29,15 @@ public class BottomBar extends JPanel {
         JPanel left = new JPanel(new BorderLayout());
         left.setOpaque(false);
         left.add(balanceLabel, BorderLayout.WEST); // stays on the left, centered vertically
-        add(left);
+        add(left, BorderLayout.WEST); //added border BorderLayout.WEST
 
         timerLabel = new JLabel("15:00", SwingConstants.CENTER);
         timerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        add(timerLabel);
+        add(timerLabel, BorderLayout.CENTER); // added BorderLayout.CENTER
 
         buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         buttons.setOpaque(false);
-        add(buttons);
+        add(buttons, BorderLayout.EAST); // added BorderLayout.EAST
     }
 
     // starts counting down; runs onTimeUp once when it reaches zero

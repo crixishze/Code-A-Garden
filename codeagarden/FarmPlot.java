@@ -1,5 +1,7 @@
 package codeagarden;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.awt.*;
 import java.util.function.IntConsumer;
 import javax.swing.*;
@@ -29,11 +31,28 @@ public class FarmPlot extends JPanel {
     private final Inventory inventory;
     private final IntConsumer harvestReward;
 
-    private final JPanel grid = new JPanel();
+    private final JPanel grid = new JPanel() {
+        @Override
+        protected void paintChildren(Graphics g) {
+            super.paintChildren(g);   // puts tiles first
+            makeDrone(g);             // puts drone on top of tile
+        }
+    };
     private int size = START_SIZE;
 
     private final JLabel status = new JLabel(" ", SwingConstants.CENTER);
     private final Timer statusTimer;
+
+    private int droneRow = 0;
+    private int droneCol = 0;
+    private final BufferedImage droneImage = loadImage("/images/drone.png");
+    private static BufferedImage loadImage(String path) {
+        try {
+            return ImageIO.read(FarmPlot.class.getResource(path));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load " + path, e);
+        }
+    }
 
     public FarmPlot(Inventory inventory, IntConsumer harvestReward) {
         this.inventory = inventory;
@@ -82,6 +101,7 @@ public class FarmPlot extends JPanel {
 
         statusTimer = new Timer(2500, e -> status.setText(" ")); // clears the message
         statusTimer.setRepeats(false);
+        new Timer(30, e -> grid.repaint()).start();
     }
 
     public int getGridSize() {
@@ -162,5 +182,47 @@ public class FarmPlot extends JPanel {
         tiles[row][col].setText("Empty");
         tiles[row][col].setBackground(SOIL_COLOR);
         harvestReward.accept(seed.getSellPrice());
+    }
+
+    //drone functions
+    public void move(String direction) {
+        int r = droneRow, c = droneCol;
+        switch (direction) {                                     //drone movement
+            case "North": r--; break;
+            case "South": r++; break;
+            case "East":  c++; break;
+            case "West":  c--; break;
+        }
+
+        if (r < 0 || r >= size || c < 0 || c >= size) return;   //so it can't leave the grid
+        droneRow = r;
+        droneCol = c;
+        grid.repaint();
+    }
+    //plant and harvest functions
+    public void plantHere() {
+        if (tileStates[droneRow][droneCol] == TileState.EMPTY) plant(droneRow, droneCol);
+    }
+    
+    public void harvestHere() {
+        if (tileStates[droneRow][droneCol] == TileState.READY) harvest(droneRow, droneCol);
+    }
+    
+    public boolean canHarvest() {
+        return tileStates[droneRow][droneCol] == TileState.READY;
+    }
+
+    private void makeDrone(Graphics g) {
+        Rectangle b = tiles[droneRow][droneCol].getBounds();
+        int s = (int) (Math.min(b.width, b.height) * 0.8);
+        int bob = (int) (Math.sin(System.currentTimeMillis() / 250.0) * 4);   //to hover up and down
+
+        int x = b.x + (b.width - s) / 2;
+        int y = b.y + (b.height - s) / 2 - 6 + bob;
+
+        g.setColor(new Color(0, 0, 0, 70));                                   //gives shadow
+        g.fillOval(b.x + b.width / 4, b.y + b.height * 3 / 4, b.width / 2, b.height / 8);
+
+        g.drawImage(droneImage, x, y, s, s, null);
     }
 }
