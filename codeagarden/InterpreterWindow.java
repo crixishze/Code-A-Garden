@@ -30,7 +30,7 @@ public class InterpreterWindow extends JFrame {
                 for (int i = 0; i < 3; i++) {
                     if (canHarvest()) {
                         harvest();
-                        plant(Bush);
+                        plant();
                         move(North);
                     }
                 }
