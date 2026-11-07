@@ -41,9 +41,12 @@ public class Main extends JFrame {
         botBar.addNavButton("Shop", () -> cards.show(content, "shop"));
         botBar.addNavButton("Inventory", () -> cards.show(content, "inventory"));
         botBar.addNavButton("Farm", () -> cards.show(content, "farm"));
+        botBar.addNavButton("Story", () -> cards.show(content, "story"));
         add(botBar, BorderLayout.SOUTH);
 
         Inventory inventory = new Inventory();
+
+        StoryModel story = new StoryModel();
 
         FarmPlot plot = new FarmPlot(inventory, botBar::addBalance);
         plot.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -51,16 +54,26 @@ public class Main extends JFrame {
         content.add(plot, "farm");                                   // first card = shown at startup
         content.add(new Store(botBar, inventory, plot), "shop");
         content.add(inventory, "inventory");
+        content.add(new StoryPanel(story, consequence -> {
+            if (consequence.balanceDelta() != 0) {
+                botBar.addBalance(consequence.balanceDelta());
+            }
+            if (consequence.seed() != null) {
+                inventory.addSeed(consequence.seed(), 1);
+            }
+        }), "story");
         DroneController controller = new DroneController(plot);
         scriptWindow = new InterpreterWindow(controller);
         add(content, BorderLayout.CENTER);
 
         // Win when the balance reaches $10,000; lose when day 30 ends.
         botBar.setOnGoalReached(() -> endGame("You Win!",
-                "You reached the goal!\nFinal balance: $" + String.format("%,d", botBar.getBalance())));
+                "You reached the goal!\n" + story.getFinalOutcome() + "\nFinal balance: $"
+                        + String.format("%,d", botBar.getBalance())));
         botBar.startDayCounter(SECONDS_PER_GAME_DAY, TOTAL_GAME_DAYS, () -> endGame("Game Over",
                 "You ran out of days!\nYou reached day " + TOTAL_GAME_DAYS
-                        + " without reaching the goal.\nFinal balance: $"
+                        + " without reaching the goal.\n" + story.getFinalOutcome()
+                        + "\nFinal balance: $"
                         + String.format("%,d", botBar.getBalance())));
 
         setVisible(true);
