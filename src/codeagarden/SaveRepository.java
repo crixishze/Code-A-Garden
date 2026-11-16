@@ -90,10 +90,7 @@ public class SaveRepository {
                     + "JOIN FARM f ON f.farm_id = pc.farm_id JOIN CROP c ON c.crop_id = pc.crop_id "
                     + "WHERE f.player_id = ?";
 
-    // ---- deleting a player (children first, because of the foreign keys) ----
-    private static final String DELETE_SAVE_ROW = "DELETE FROM `SAVE` WHERE player_id = ?";
-    private static final String DELETE_INVENTORY = "DELETE FROM INVENTORY WHERE player_id = ?";
-    private static final String DELETE_FARM = "DELETE FROM FARM WHERE player_id = ?";
+    // ---- deleting a player (ON DELETE CASCADE in sql/schema.sql removes everything that belongs to them) ----
     private static final String DELETE_PLAYER = "DELETE FROM PLAYER WHERE player_id = ?";
 
     // ---- leaderboard: richest first ----
@@ -188,20 +185,9 @@ public class SaveRepository {
     /** Deletes the player completely: save, farm, inventory, and their leaderboard entry. */
     public void deleteSave(Player player) throws SaveException {
         try (Connection connection = connect()) {
-            connection.setAutoCommit(false);
-            try {
-                int id = player.getId();
-                update(connection, DELETE_SAVE_ROW, id);
-                update(connection, DELETE_TILES, id);
-                update(connection, DELETE_SEEDS, id);
-                update(connection, DELETE_INVENTORY, id);
-                update(connection, DELETE_FARM, id);
-                update(connection, DELETE_PLAYER, id);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw e;
-            }
+            // One DELETE is enough: the database cascades to the farm, planted crops,
+            // inventory, seeds and save, and a single statement is already all-or-nothing.
+            update(connection, DELETE_PLAYER, player.getId());
         } catch (SQLException e) {
             throw explain(e);
         }
