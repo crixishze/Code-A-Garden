@@ -21,7 +21,7 @@ import javax.swing.SwingConstants;
  */
 public final class UIFactory {
 
-    private static final int ROW_HEIGHT = 56;
+    private static final int ROW_HEIGHT = 60;
     private static final int TITLE_HEIGHT = 48;
     private static final int BUTTON_BORDER_WIDTH = 3;
 
