@@ -77,8 +77,7 @@ final class LeaveGameDialog {
 
         JPanel choices = new JPanel(new FlowLayout(FlowLayout.CENTER, 18, 0));
         choices.setOpaque(false);
-        choices.add(choiceButton(canSave ? "SAVE AND\nQUIT" : "YES", greenImage, CHOICE_BUTTON_HEIGHT,
-                canSave ? TWO_LINE_FONT_SIZE : CHOICE_FONT_SIZE,
+        choices.add(choiceButton(canSave ? "SAVE" : "YES", greenImage, CHOICE_BUTTON_HEIGHT, CHOICE_FONT_SIZE,
                 canSave ? Choice.SAVE_AND_LEAVE : Choice.LEAVE, picked, dialog));
         choices.add(choiceButton(canSave ? "QUIT" : "NO", redImage, CHOICE_BUTTON_HEIGHT, CHOICE_FONT_SIZE,
                 canSave ? Choice.LEAVE : Choice.CANCEL, picked, dialog));
@@ -171,7 +170,7 @@ final class LeaveGameDialog {
         PromptLabel(String firstLine, String secondLine) {
             this.firstLine = firstLine;
             this.secondLine = secondLine;
-            Dimension size = new Dimension(480, 100);
+            Dimension size = new Dimension(480, 130);
             setPreferredSize(size);
             setMinimumSize(size);
             setOpaque(false);
