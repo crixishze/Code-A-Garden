@@ -265,7 +265,8 @@ INSERT INTO INVENTORY_CROP (inventory_id, crop_id, quantity) VALUES
 (20, '00C', 1);
 
 -- SAMPLE DATA: SAVE (players 1-10 are on day 1 and can CONTINUE; players 11-20 are at different points,
--- and 12, 16 and 20 are finished games that CONTINUE refuses to load)
+-- and 12, 16 and 20 are finished games that CONTINUE refuses to load). chapters_done is always 0:
+-- the game no longer has a story, the column was kept so the table did not change.
 INSERT INTO `SAVE` (player_id, inventory_id, farm_id, saved_at, elapsed_seconds, chapters_done, finished) VALUES
 (1, 1, 1, '2026-10-15 10:00:00', 0, 0, 0),
 (2, 2, 2, '2026-10-15 10:05:00', 0, 0, 0),
@@ -278,15 +279,15 @@ INSERT INTO `SAVE` (player_id, inventory_id, farm_id, saved_at, elapsed_seconds,
 (9, 9, 9, '2026-10-15 10:40:00', 0, 0, 0),
 (10, 10, 10, '2026-10-15 10:45:00', 0, 0, 0),
 (11, 11, 11, '2026-10-15 10:50:00', 120, 0, 0),
-(12, 12, 12, '2026-10-15 10:55:00', 1500, 3, 1),
+(12, 12, 12, '2026-10-15 10:55:00', 1500, 0, 1),
 (13, 13, 13, '2026-10-15 11:00:00', 300, 0, 0),
-(14, 14, 14, '2026-10-15 11:05:00', 780, 1, 0),
+(14, 14, 14, '2026-10-15 11:05:00', 780, 0, 0),
 (15, 15, 15, '2026-10-15 11:10:00', 60, 0, 0),
-(16, 16, 16, '2026-10-15 11:15:00', 1800, 3, 1),
-(17, 17, 17, '2026-10-15 11:20:00', 540, 1, 0),
-(18, 18, 18, '2026-10-15 11:25:00', 1200, 2, 0),
-(19, 19, 19, '2026-10-15 11:30:00', 900, 2, 0),
-(20, 20, 20, '2026-10-15 11:35:00', 1800, 2, 1);
+(16, 16, 16, '2026-10-15 11:15:00', 1800, 0, 1),
+(17, 17, 17, '2026-10-15 11:20:00', 540, 0, 0),
+(18, 18, 18, '2026-10-15 11:25:00', 1200, 0, 0),
+(19, 19, 19, '2026-10-15 11:30:00', 900, 0, 0),
+(20, 20, 20, '2026-10-15 11:35:00', 1800, 0, 1);
 
 -- LEADERBOARD (the same query the game runs): richest player first
 SELECT player_name, currency FROM PLAYER ORDER BY currency DESC, player_name;
