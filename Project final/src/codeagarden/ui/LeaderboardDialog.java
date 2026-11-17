@@ -12,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -34,7 +33,7 @@ final class LeaderboardDialog {
         try {
             entries = new SaveRepository().getLeaderboard();   // already sorted by the SQL (ORDER BY currency DESC)
         } catch (SaveException e) {
-            JOptionPane.showMessageDialog(owner, e.getMessage(), "Leaderboard unavailable", JOptionPane.WARNING_MESSAGE);
+            GameDialog.message(owner, "Leaderboard unavailable", e.getMessage());
             return;
         }
 

@@ -107,7 +107,7 @@ final class ReportsDialog {
         } catch (SaveException e) {
             model.setDataVector(new Object[0][0], new Object[0]);
             info.setText("Could not run the report.");
-            JOptionPane.showMessageDialog(dialog, e.getMessage(), "Report unavailable", JOptionPane.WARNING_MESSAGE);
+            GameDialog.message(dialog, "Report unavailable", e.getMessage());
         }
     }
 

@@ -22,7 +22,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /** The title screen: NEW GAME, CONTINUE, LEADERBOARD, REPORTS and EXIT over the garden picture. */
@@ -60,7 +59,7 @@ public class MainMenu extends JFrame {
     // ---- NEW GAME: log in (or create the player), then start from day 1 ----
     private void startNewGame() {
         LoginForm login = LoginForm.ask(this, "New Game",
-                "Pick a player name and password. You need them to CONTINUE later.");
+                "Pick a name and password. You need them to CONTINUE later.", "Start");
         if (login == null) {
             return;
         }
@@ -102,7 +101,7 @@ public class MainMenu extends JFrame {
 
     // ---- CONTINUE: log in, then Load or Delete this player's save ----
     private void continueGame() {
-        LoginForm login = LoginForm.ask(this, "Continue", "Enter your player name and password.");
+        LoginForm login = LoginForm.ask(this, "Continue", "Enter your player name and password.", "Log In");
         if (login == null) {
             return;
         }
@@ -115,8 +114,7 @@ public class MainMenu extends JFrame {
                 startGame(player, data);
             } else if ("Delete save".equals(choice) && confirmDelete(player)) {
                 repository.deleteSave(player);
-                JOptionPane.showMessageDialog(this, player.getName() + " was deleted.",
-                        "Delete save", JOptionPane.INFORMATION_MESSAGE);
+                GameDialog.message(this, "Deleted", player.getName() + " was deleted.");
             }
         } catch (SaveException e) {
             showWarning("Could not load your game", e.getMessage());
@@ -136,8 +134,7 @@ public class MainMenu extends JFrame {
                     + "   Balance: $" + String.format("%,d", data.getBalance());
             options = new String[] {"Load", "Delete save", "Cancel"};
         }
-        int picked = JOptionPane.showOptionDialog(this, message, "Continue", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        int picked = GameDialog.choose(this, "Continue", message, options);
         return picked >= 0 ? options[picked] : null;
     }
 
@@ -172,13 +169,12 @@ public class MainMenu extends JFrame {
 
     // A warning pop-up with one OK button.
     private void showWarning(String title, String message) {
-        JOptionPane.showMessageDialog(this, message, title, JOptionPane.WARNING_MESSAGE);
+        GameDialog.message(this, title, message);
     }
 
     // A Yes / No question; true if Yes was picked.
     private boolean askYesNo(String title, String message) {
-        return JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION)
-                == JOptionPane.YES_OPTION;
+        return GameDialog.yesNo(this, title, message);
     }
 
     /** Draws the background and arranges the title and the five buttons. */

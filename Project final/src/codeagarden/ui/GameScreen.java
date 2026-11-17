@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -197,8 +196,8 @@ public class GameScreen extends JFrame {
             new SaveRepository().save(session.getPlayer(), session.createSaveData());
             return true;
         } catch (SaveException e) {
-            JOptionPane.showMessageDialog(this, "Your game could not be saved.\n" + e.getMessage()
-                    + "\nPick QUIT to leave without saving.", "Save problem", JOptionPane.WARNING_MESSAGE);
+            GameDialog.message(this, "Save problem", "Your game could not be saved.\n" + e.getMessage()
+                    + "\nPick QUIT to leave without saving.");
             return false;
         }
     }
@@ -211,8 +210,7 @@ public class GameScreen extends JFrame {
         try {
             new SaveRepository().saveFinishedGame(session.getPlayer(), session.createSaveData());
         } catch (SaveException e) {
-            JOptionPane.showMessageDialog(this, "Your result could not be saved.\n" + e.getMessage(),
-                    "Save problem", JOptionPane.WARNING_MESSAGE);
+            GameDialog.message(this, "Save problem", "Your result could not be saved.\n" + e.getMessage());
         }
     }
 
@@ -228,13 +226,11 @@ public class GameScreen extends JFrame {
         gameFinished = true;
         stopEverything();
         recordResult();
-        String title = won ? "You Win!" : "Season Over";
+        String title = won ? "YOU WIN!" : "SEASON OVER";
         String message = won
                 ? session.getStory().getWinEnding(session.getCurrentDay(), session.getBalance())
                 : session.getStory().getLoseEnding(session.getBalance());
-        Object[] options = {"Play Again", "Main Menu"};
-        int choice = JOptionPane.showOptionDialog(this, message, title, JOptionPane.DEFAULT_OPTION,
-                won ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+        int choice = GameDialog.choose(this, title, message, "Play Again", "Main Menu");
         dispose();
         if (choice == 0) {
             session.reset();   // new balance, empty farm, a fresh 30-day season; same player
