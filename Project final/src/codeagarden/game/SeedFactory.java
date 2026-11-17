@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * DESIGN PATTERN: Factory Method.
  * The only place that knows how to build each Seed (its price, grow time and sell price).
- * The shop, the story and the inventory ask this factory for a seed by name instead of
+ * The shop, the inventory and planting ask this factory for a seed by name instead of
  * writing "new Seed(...)" with the numbers themselves. To change a crop or add one,
  * edit this one class.
  */

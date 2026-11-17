@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * DESIGN PATTERN: Singleton.
  * There is exactly ONE GameSession in the whole program. It holds everything that
- * changes during a game: balance, time played, farm, inventory and story progress. Every
+ * changes during a game: balance, time played, farm and inventory. Every
  * screen calls GameSession.getInstance() and gets the same object, so they can never
  * disagree (for example the shop and the bottom bar always show the same balance).
  * Play Again calls reset(); saving and loading read and write this one object.
@@ -31,7 +31,6 @@ public final class GameSession {
     private int elapsedSeconds;
     private Farm farm;
     private PlayerInventory inventory;
-    private StoryModel story;
     private Player player;   // kept by reset(): Play Again is still the same player
 
     // private: nobody else may create a GameSession
@@ -44,13 +43,12 @@ public final class GameSession {
         return INSTANCE;
     }
 
-    /** Starts a brand-new game: starting money, day 1, empty farm, empty inventory, story at chapter 1. */
+    /** Starts a brand-new game: starting money, day 1, empty farm, empty inventory. */
     public void reset() {
         balance = STARTING_BALANCE;
         elapsedSeconds = 0;
         farm = new Farm();
         inventory = new PlayerInventory();
-        story = new StoryModel();
     }
 
     // ---- money ----
@@ -60,7 +58,7 @@ public final class GameSession {
         return balance;
     }
 
-    /** Adds money (a harvest or a story reward). A negative amount takes money away. */
+    /** Adds money (a harvest). A negative amount takes money away. */
     public void addBalance(int amount) {
         balance += amount;
     }
@@ -113,11 +111,6 @@ public final class GameSession {
         return inventory;
     }
 
-    /** The story chapters and how far the player has got. */
-    public StoryModel getStory() {
-        return story;
-    }
-
     // ---- the player ----
 
     /** The logged-in player, or null when playing without a database. */
@@ -148,7 +141,7 @@ public final class GameSession {
                 }
             }
         }
-        return new SaveData(balance, elapsedSeconds, story.getChaptersDone(), inventory.getCounts(), tiles);
+        return new SaveData(balance, elapsedSeconds, inventory.getCounts(), tiles);
     }
 
     /** Replaces the whole game with a saved one, using the current time. */
@@ -169,7 +162,6 @@ public final class GameSession {
         for (SavedTile tile : data.getTiles()) {
             restoreTile(tile, nowMillis);
         }
-        story.restoreChaptersDone(data.getChaptersDone());
     }
 
     // Puts one saved crop back on the farm. Bad data (outside the farm, unknown seed) is skipped.
@@ -180,16 +172,6 @@ public final class GameSession {
         Plot plot = farm.getPlot(tile.getRow(), tile.getCol());
         if (plot.isEmpty()) {
             plot.restore(SeedFactory.createSeed(tile.getSeedName()), tile.getGrownMillis(), nowMillis);
-        }
-    }
-
-    /** Applies the money and seed reward of a story reply. */
-    public void applyConsequence(StoryModel.StoryConsequence consequence) {
-        if (consequence.balanceDelta() != 0) {
-            addBalance(consequence.balanceDelta());
-        }
-        if (consequence.seed() != null) {
-            inventory.addSeed(consequence.seed(), 1);
         }
     }
 }

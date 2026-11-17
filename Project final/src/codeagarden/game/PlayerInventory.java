@@ -12,7 +12,7 @@ public class PlayerInventory {
 
     private final Map<String, Integer> counts = new LinkedHashMap<>();
 
-    /** Adds seeds of this kind (buying in the shop, or a story reward). */
+    /** Adds seeds of this kind (buying in the shop). */
     public void addSeed(Seed seed, int amount) {
         counts.merge(seed.getName(), amount, Integer::sum);
     }
