@@ -10,11 +10,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +20,8 @@ import java.util.Properties;
 
 /**
  * The only class that talks to the MySQL database, through JDBC (java.sql). ALL the SQL in the
- * game is in this file; the screens only call methods like logIn(), save(), load(), deleteSave(),
- * getLeaderboard() and runReport().
+ * game is in this file; the screens only call methods like logIn(), save(), load(), deleteSave()
+ * and getLeaderboard().
  *
  * Tables (see sql/schema.sql): PLAYER, FARM, CROP, PLANTED_CROP, INVENTORY, INVENTORY_CROP, SAVE.
  * Every player has exactly one FARM, one INVENTORY and at most one SAVE.
@@ -43,6 +41,9 @@ public class SaveRepository {
     // The farm is always 4 rows x 6 columns. FARM.farm_size is kept in the database
     // (so the tables did not change) and always stores the number of rows.
     private static final int FARM_SIZE_IN_DATABASE = Farm.ROWS;
+
+    // SAVE.chapters_done is kept in the database (so the tables did not change) but the game has
+    // no story any more, so it is always saved as 0.
 
     // MySQL error numbers we explain in plain words
     private static final int ERROR_DUPLICATE_ENTRY = 1062;
@@ -77,17 +78,17 @@ public class SaveRepository {
                     + "SELECT i.inventory_id, c.crop_id, ? FROM INVENTORY i, CROP c "
                     + "WHERE i.player_id = ? AND c.crop_name = ?";
     private static final String UPDATE_SAVE =
-            "UPDATE `SAVE` SET saved_at = NOW(), elapsed_seconds = ?, chapters_done = ?, finished = ? "
+            "UPDATE `SAVE` SET saved_at = NOW(), elapsed_seconds = ?, chapters_done = 0, finished = ? "
                     + "WHERE player_id = ?";
     private static final String INSERT_SAVE =
             "INSERT INTO `SAVE` (player_id, inventory_id, farm_id, saved_at, elapsed_seconds, chapters_done, finished) "
-                    + "SELECT p.player_id, i.inventory_id, f.farm_id, NOW(), ?, ?, ? FROM PLAYER p "
+                    + "SELECT p.player_id, i.inventory_id, f.farm_id, NOW(), ?, 0, ? FROM PLAYER p "
                     + "JOIN INVENTORY i ON i.player_id = p.player_id JOIN FARM f ON f.player_id = p.player_id "
                     + "WHERE p.player_id = ?";
 
     // ---- loading ----
     private static final String SELECT_SAVE =
-            "SELECT s.elapsed_seconds, s.chapters_done, s.finished, p.currency FROM `SAVE` s "
+            "SELECT s.elapsed_seconds, s.finished, p.currency FROM `SAVE` s "
                     + "JOIN PLAYER p ON p.player_id = s.player_id WHERE s.player_id = ?";
     private static final String SELECT_SEEDS =
             "SELECT c.crop_name, ic.quantity FROM INVENTORY_CROP ic "
@@ -105,50 +106,6 @@ public class SaveRepository {
     private static final String SELECT_LEADERBOARD =
             "SELECT player_name, currency FROM PLAYER ORDER BY currency DESC, player_name LIMIT " + LEADERBOARD_SIZE;
 
-    // ---- the REPORTS screen: 10 business questions ----
-    private static final List<Report> REPORTS = Arrays.asList(
-            new Report("Leaderboard (richest first)", "ORDER BY", null,
-                    "SELECT player_name AS Player, currency AS Money FROM PLAYER "
-                            + "ORDER BY currency DESC, player_name"),
-            new Report("Search players by name", "WHERE + LIKE, typed value", "Show players whose name starts with:",
-                    "SELECT player_name AS Player, currency AS Money FROM PLAYER "
-                            + "WHERE player_name LIKE CONCAT(?, '%') ORDER BY player_name"),
-            new Report("Crops ready to harvest", "JOIN of 4 tables, WHERE", null,
-                    "SELECT p.player_name AS Player, c.crop_name AS Crop, pc.row_num AS `Row`, pc.col_num AS `Column` "
-                            + "FROM PLANTED_CROP pc JOIN FARM f ON pc.farm_id = f.farm_id "
-                            + "JOIN PLAYER p ON f.player_id = p.player_id JOIN CROP c ON pc.crop_id = c.crop_id "
-                            + "WHERE pc.state = 'Matured' ORDER BY p.player_name"),
-            new Report("Planted plots per player", "LEFT JOIN, COUNT, GROUP BY", null,
-                    "SELECT p.player_name AS Player, COUNT(pc.crop_id) AS `Planted plots` FROM PLAYER p "
-                            + "JOIN FARM f ON f.player_id = p.player_id "
-                            + "LEFT JOIN PLANTED_CROP pc ON pc.farm_id = f.farm_id "
-                            + "GROUP BY p.player_id, p.player_name ORDER BY `Planted plots` DESC, p.player_name"),
-            new Report("Players with 3 or more planted plots", "JOIN, GROUP BY + HAVING", null,
-                    "SELECT p.player_name AS Player, COUNT(*) AS `Planted plots` FROM PLAYER p "
-                            + "JOIN FARM f ON f.player_id = p.player_id JOIN PLANTED_CROP pc ON pc.farm_id = f.farm_id "
-                            + "GROUP BY p.player_id, p.player_name HAVING COUNT(*) >= 3 ORDER BY p.player_name"),
-            new Report("Total seeds owned per player", "JOIN, SUM, GROUP BY", null,
-                    "SELECT p.player_name AS Player, SUM(ic.quantity) AS Seeds FROM PLAYER p "
-                            + "JOIN INVENTORY i ON i.player_id = p.player_id "
-                            + "JOIN INVENTORY_CROP ic ON ic.inventory_id = i.inventory_id "
-                            + "GROUP BY p.player_id, p.player_name ORDER BY Seeds DESC, p.player_name"),
-            new Report("Players richer than the average", "Subquery, AVG", null,
-                    "SELECT player_name AS Player, currency AS Money FROM PLAYER "
-                            + "WHERE currency > (SELECT AVG(currency) FROM PLAYER) ORDER BY currency DESC"),
-            new Report("Most profitable crop per second", "Calculated column, ORDER BY", null,
-                    "SELECT crop_name AS Crop, reward - cost AS Profit, "
-                            + "ROUND((reward - cost) / growth_time, 2) AS `Profit per second` "
-                            + "FROM CROP ORDER BY `Profit per second` DESC"),
-            new Report("Games in progress vs finished", "JOIN, COUNT, AVG, GROUP BY", null,
-                    "SELECT CASE WHEN s.finished = 1 THEN 'Finished' ELSE 'In progress' END AS Status, "
-                            + "COUNT(*) AS Players, ROUND(AVG(p.currency), 1) AS `Average money` "
-                            + "FROM `SAVE` s JOIN PLAYER p ON p.player_id = s.player_id "
-                            + "GROUP BY s.finished ORDER BY s.finished"),
-            new Report("Players with nothing ready to harvest", "Subquery, NOT IN", null,
-                    "SELECT player_name AS Player FROM PLAYER WHERE player_id NOT IN ("
-                            + "SELECT f.player_id FROM FARM f JOIN PLANTED_CROP pc ON pc.farm_id = f.farm_id "
-                            + "WHERE pc.state = 'Matured') ORDER BY player_name")
-    );
     // ====================================================================
 
     // ---------------------------- players ----------------------------
@@ -229,7 +186,7 @@ public class SaveRepository {
                 return null;
             }
             return new SaveData(row.getInt("currency"), row.getInt("elapsed_seconds"),
-                    row.getInt("chapters_done"), readSeeds(connection, player), readTiles(connection, player));
+                    readSeeds(connection, player), readTiles(connection, player));
         } catch (SQLException e) {
             throw explain(e);
         }
@@ -264,49 +221,6 @@ public class SaveRepository {
         } catch (SQLException e) {
             throw explain(e);
         }
-    }
-
-    // ----------------------------- reports -----------------------------
-
-    /** The 10 reports shown on the REPORTS screen, in menu order. */
-    public List<Report> getReports() {
-        return REPORTS;
-    }
-
-    /**
-     * Runs one report and returns its columns and rows. input is the typed value for a
-     * report that needs one (it goes into the ? of a PreparedStatement); otherwise it is ignored.
-     */
-    public ReportResult runReport(Report report, String input) throws SaveException {
-        try (Connection connection = connect();
-             PreparedStatement statement = connection.prepareStatement(report.sql)) {
-            if (report.needsInput()) {
-                statement.setString(1, input == null ? "" : input.trim());
-            }
-            try (ResultSet rows = statement.executeQuery()) {
-                return readResult(rows);
-            }
-        } catch (SQLException e) {
-            throw explain(e);
-        }
-    }
-
-    // Copies any query result into a ReportResult: column names first, then every row.
-    private ReportResult readResult(ResultSet rows) throws SQLException {
-        ResultSetMetaData meta = rows.getMetaData();
-        List<String> columns = new ArrayList<>();
-        for (int i = 1; i <= meta.getColumnCount(); i++) {
-            columns.add(meta.getColumnLabel(i));   // the "AS" name, e.g. "Player"
-        }
-        List<List<Object>> table = new ArrayList<>();
-        while (rows.next()) {
-            List<Object> row = new ArrayList<>();
-            for (int i = 1; i <= columns.size(); i++) {
-                row.add(rows.getObject(i));
-            }
-            table.add(row);
-        }
-        return new ReportResult(columns, table);
     }
 
     // ------------------------- the steps of saving -------------------------
@@ -364,10 +278,9 @@ public class SaveRepository {
     private void writeSaveRow(Connection connection, int playerId, SaveData data, boolean finished)
             throws SQLException {
         int finishedFlag = finished ? 1 : 0;
-        int changed = update(connection, UPDATE_SAVE, data.getElapsedSeconds(), data.getChaptersDone(),
-                finishedFlag, playerId);
+        int changed = update(connection, UPDATE_SAVE, data.getElapsedSeconds(), finishedFlag, playerId);
         if (changed == 0) {   // first save for this player
-            update(connection, INSERT_SAVE, data.getElapsedSeconds(), data.getChaptersDone(), finishedFlag, playerId);
+            update(connection, INSERT_SAVE, data.getElapsedSeconds(), finishedFlag, playerId);
         }
     }
 

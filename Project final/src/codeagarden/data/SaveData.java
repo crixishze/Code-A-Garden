@@ -7,23 +7,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Everything that goes into a save: currency, time played, story chapters finished,
+ * Everything that goes into a save: currency, time played,
  * seeds owned and every planted tile. A plain data holder; it knows nothing about the database.
  */
 public class SaveData {
 
     private final int balance;
     private final int elapsedSeconds;
-    private final int chaptersDone;
     private final Map<String, Integer> seedCounts;
     private final List<SavedTile> tiles;
 
     /** Copies the values; the seed map and tile list can't be changed afterwards. */
-    public SaveData(int balance, int elapsedSeconds, int chaptersDone,
-                    Map<String, Integer> seedCounts, List<SavedTile> tiles) {
+    public SaveData(int balance, int elapsedSeconds, Map<String, Integer> seedCounts, List<SavedTile> tiles) {
         this.balance = balance;
         this.elapsedSeconds = elapsedSeconds;
-        this.chaptersDone = chaptersDone;
         this.seedCounts = Collections.unmodifiableMap(new LinkedHashMap<>(seedCounts));
         this.tiles = Collections.unmodifiableList(new ArrayList<>(tiles));
     }
@@ -36,11 +33,6 @@ public class SaveData {
     /** Seconds played this season; the time remaining is worked out from this. */
     public int getElapsedSeconds() {
         return elapsedSeconds;
-    }
-
-    /** How many story chapters were finished (0 to 3). */
-    public int getChaptersDone() {
-        return chaptersDone;
     }
 
     /** Seed name to amount owned. */
