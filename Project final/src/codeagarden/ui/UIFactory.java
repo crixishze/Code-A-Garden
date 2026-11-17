@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 
 /**
  * DESIGN PATTERN: Factory Method (second use, next to SeedFactory).
- * Builds the buttons, rows, titles and panels for the shop, inventory and story screens.
+ * Builds the buttons, rows, titles and panels for the shop, inventory and pop-up windows.
  * Each screen asks for "a green button" or "a seed row" instead of repeating about
  * 15 lines of styling code. To change how every button looks, edit one method here.
  */

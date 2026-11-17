@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 /**
- * The pop-up shown when the player leaves a game (MENU button or closing the window).
+ * The pop-up shown when the player leaves a game (Menu button or closing the window).
  * With a logged-in player:  SAVE AND QUIT / QUIT / CANCEL.
  * Without one (no database): YES / NO, because there is nothing to save to.
  * Replaces the old ReturnToMenuDialog.

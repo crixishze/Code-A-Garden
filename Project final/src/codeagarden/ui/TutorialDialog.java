@@ -27,7 +27,7 @@ final class TutorialDialog {
         "3. Moving the drone",
         "4. Planting and harvesting",
         "5. Writing loops and decisions",
-        "6. Story and the ending"
+        "6. How the game ends"
     };
 
     private static final String[] PAGES = {
@@ -38,7 +38,7 @@ final class TutorialDialog {
                 + "and the drone only follows code that you write in the panel\n"
                 + "on the right.\n\n"
                 + "The buttons at the bottom open the Shop (buy seeds),\n"
-                + "the Inventory (your seeds), the Story, and the Farm again.",
+                + "the Inventory (your seeds), and the Farm again.",
 
         "The code panel is on the right side of the screen.\n\n"
                 + "  ▶  Run    starts your code (the button becomes ■ Stop)\n"
@@ -84,14 +84,12 @@ final class TutorialDialog {
                 + "    move(East);\n"
                 + "}",
 
-        "Open the Story to follow the garden's chapters. Each chapter\n"
-                + "has a few pages and ends with a choice that can give you\n"
-                + "money or a free seed.\n\n"
-                + "The game ends by itself:\n"
+        "The game ends by itself:\n\n"
                 + "  WIN   as soon as your balance reaches $10,000\n"
                 + "  LOSE  when day 30 is over and you have less than $10,000\n\n"
-                + "After the ending you can Play Again or go back to the\n"
-                + "Main Menu. Your result is saved for the leaderboard.\n\n"
+                + "When it ends, the drone stops and you can no longer farm.\n"
+                + "You can then Play Again or go back to the Main Menu.\n"
+                + "Your result is saved for the leaderboard.\n\n"
                 + "Good luck, and happy farming!"
     };
 

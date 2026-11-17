@@ -24,7 +24,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-/** The title screen: NEW GAME, CONTINUE, LEADERBOARD, REPORTS and EXIT over the garden picture. */
+/** The title screen: NEW GAME, CONTINUE, LEADERBOARD and EXIT over the garden picture. */
 public class MainMenu extends JFrame {
 
     private static final String BACKGROUND_PATH = "/images/Background1.png";
@@ -35,11 +35,11 @@ public class MainMenu extends JFrame {
     private static final Dimension MIN_SIZE = new Dimension(800, 500);
     private static final Dimension DEFAULT_SIZE = new Dimension(1280, 720);
     private static final int BUTTON_WIDTH = 360;      // button picture width at scale 1
-    private static final int BUTTON_PADDING = 8;      // small, so five buttons still fit at a readable size
+    private static final int BUTTON_PADDING = 8;
     private static final int TEXT_OFFSET_Y = -6;      // nudges the text up into the button's face
     private static final float NEW_GAME_FONT_SIZE = 27f;
     private static final float OTHER_FONT_SIZE = 25f;
-    private static final int BUTTON_COUNT = 5;
+    private static final int BUTTON_COUNT = 4;
     private static final int BUTTON_GAP = 8;             // top + bottom inset around each button
     private static final float BUTTON_SHARE = 0.66f;     // part of the window height the buttons may use
     private static final float BUTTON_IMAGE_RATIO = 161f / 362f;   // height / width of the button picture
@@ -162,11 +162,6 @@ public class MainMenu extends JFrame {
         LeaderboardDialog.show(this);
     }
 
-    // REPORTS: the 10 business questions answered by SQL queries.
-    private void showReports() {
-        ReportsDialog.show(this);
-    }
-
     // A warning pop-up with one OK button.
     private void showWarning(String title, String message) {
         GameDialog.message(this, title, message);
@@ -177,14 +172,13 @@ public class MainMenu extends JFrame {
         return GameDialog.yesNo(this, title, message);
     }
 
-    /** Draws the background and arranges the title and the five buttons. */
+    /** Draws the background and arranges the title and the four buttons. */
     private class MenuPanel extends JPanel {
         private final BufferedImage background = Resources.loadImage(BACKGROUND_PATH);
         private final ImageLabel title = new ImageLabel(Resources.loadImage(TITLE_PATH));
         private final MenuButton newGame;
         private final MenuButton continueButton;
         private final MenuButton leaderboard;
-        private final MenuButton reports;
         private final MenuButton exit;
 
         MenuPanel() {
@@ -196,8 +190,6 @@ public class MainMenu extends JFrame {
                     Theme.MENU_TEXT_BROWN, Theme.MENU_TEXT_BROWN_HOVER, MainMenu.this::continueGame);
             leaderboard = new MenuButton(whiteButton, "LEADERBOARD", OTHER_FONT_SIZE,
                     Theme.MENU_TEXT_BROWN, Theme.MENU_TEXT_BROWN_HOVER, MainMenu.this::showLeaderboard);
-            reports = new MenuButton(whiteButton, "REPORTS", OTHER_FONT_SIZE,
-                    Theme.MENU_TEXT_BROWN, Theme.MENU_TEXT_BROWN_HOVER, MainMenu.this::showReports);
             exit = new MenuButton(woodButton, "EXIT", OTHER_FONT_SIZE,
                     Theme.MENU_TEXT_CREAM, Color.WHITE, () -> System.exit(0));
 
@@ -211,7 +203,6 @@ public class MainMenu extends JFrame {
             add(newGame, c);
             add(continueButton, c);
             add(leaderboard, c);
-            add(reports, c);
             add(exit, c);
 
             // size things now, then again whenever the window changes size
@@ -224,7 +215,7 @@ public class MainMenu extends JFrame {
             });
         }
 
-        // Reserve space for all five buttons so the complete menu stays visible.
+        // Reserve space for all four buttons so the complete menu stays visible.
         private void updateScales(int windowWidth, int windowHeight) {
             float maxTitleWidth = Math.min(800f, windowWidth * 0.72f);
             float maxTitleHeight = Math.min(220f, windowHeight * 0.24f);
@@ -232,14 +223,13 @@ public class MainMenu extends JFrame {
                     maxTitleHeight / title.image.getHeight());
             title.setScale(Math.max(0.1f, titleScale));
 
-            // The scale at which all five buttons (picture + padding + gap) fit in BUTTON_SHARE of the height.
+            // The scale at which all four buttons (picture + padding + gap) fit in BUTTON_SHARE of the height.
             float spaceForPictures = windowHeight * BUTTON_SHARE - BUTTON_COUNT * (2 * BUTTON_PADDING + BUTTON_GAP);
             float fittingScale = spaceForPictures / (BUTTON_COUNT * BUTTON_WIDTH * BUTTON_IMAGE_RATIO);
             float buttonScale = Math.max(0.2f, Math.min(0.52f, fittingScale));
             newGame.setScale(buttonScale);
             continueButton.setScale(buttonScale);
             leaderboard.setScale(buttonScale);
-            reports.setScale(buttonScale);
             exit.setScale(buttonScale);
         }
 
@@ -327,7 +317,13 @@ public class MainMenu extends JFrame {
                     boolean clicked = pressed && hover;   // released while still over the button
                     pressed = false;
                     if (clicked) {
+                        hover = false;   // a pop-up is about to open, so the button never hears the mouse leave
+                        repaint();
                         onClick.run();
+                        if (isShowing()) {   // back from the pop-up: dark text only if the mouse is really over it
+                            hover = getMousePosition() != null;
+                            repaint();
+                        }
                     }
                 }
             });

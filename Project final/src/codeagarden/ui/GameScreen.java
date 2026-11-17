@@ -17,7 +17,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 /**
- * The game window. The left side shows the Farm (or the Shop, Inventory or Story); the right
+ * The game window. The left side shows the Farm (or the Shop or Inventory); the right
  * side is always the code editor. It runs the one-second day timer and ends the game by itself:
  * WIN as soon as the balance reaches $10,000, LOSE when day 30 is over without it.
  * The game state itself lives in GameSession.
@@ -33,7 +33,6 @@ public class GameScreen extends JFrame {
     private static final String FARM_CARD = "farm";
     private static final String SHOP_CARD = "shop";
     private static final String INVENTORY_CARD = "inventory";
-    private static final String STORY_CARD = "story";
 
     private final GameSession session = GameSession.getInstance();
     private final CardLayout cards = new CardLayout();
@@ -68,9 +67,8 @@ public class GameScreen extends JFrame {
         content.add(farmPanel, FARM_CARD);   // first card = shown at startup
         content.add(new ShopPanel(this::onMoneyChanged), SHOP_CARD);
         content.add(inventoryPanel, INVENTORY_CARD);
-        content.add(new StoryPanel(this::onMoneyChanged), STORY_CARD);
 
-        // left: farm / shop / inventory / story   right: the code editor
+        // left: farm / shop / inventory   right: the code editor
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, content, codePanel);
         split.setResizeWeight(FARM_SHARE);
         split.setContinuousLayout(true);
@@ -104,7 +102,6 @@ public class GameScreen extends JFrame {
         bottomBar.addNavButton("Farm", () -> showCard(FARM_CARD));
         bottomBar.addNavButton("Shop", () -> showCard(SHOP_CARD));
         bottomBar.addNavButton("Inventory", () -> showCard(INVENTORY_CARD));
-        bottomBar.addNavButton("Story", () -> showCard(STORY_CARD));
     }
 
     // Shows one screen on the left side (the inventory is re-read first, seeds may have changed).
@@ -151,9 +148,9 @@ public class GameScreen extends JFrame {
         }
     }
 
-    // ---- leaving the game: MENU button or the window's close button ----
+    // ---- leaving the game: Menu button or the window's close button ----
 
-    // MENU: ask about saving, then go back to the main menu.
+    // Menu: ask about saving, then go back to the main menu.
     private void onMenuPressed() {
         if (askToLeave("Save before going", "to the menu?", "Return to the", "main menu?")) {
             stopEverything();
@@ -221,15 +218,13 @@ public class GameScreen extends JFrame {
         codePanel.stop();
     }
 
-    // The ending: farming stops, the result is saved, the story ending is shown, then Play Again or Main Menu.
+    // The ending: farming stops, the result is saved, the win or lose message is shown, then Play Again or Main Menu.
     private void finishGame(boolean won) {
         gameFinished = true;
         stopEverything();
         recordResult();
         String title = won ? "YOU WIN!" : "SEASON OVER";
-        String message = won
-                ? session.getStory().getWinEnding(session.getCurrentDay(), session.getBalance())
-                : session.getStory().getLoseEnding(session.getBalance());
+        String message = won ? winMessage() : loseMessage();
         int choice = GameDialog.choose(this, title, message, "Play Again", "Main Menu");
         dispose();
         if (choice == 0) {
@@ -238,5 +233,26 @@ public class GameScreen extends JFrame {
         } else {
             new MainMenu();
         }
+    }
+
+    // The text of the WIN ending.
+    private String winMessage() {
+        return "Congratulations! You reached the goal of $" + money(GameSession.GOAL) + " on day "
+                + session.getCurrentDay() + " with $" + money(session.getBalance()) + ".\n\n"
+                + "Your code ran the farm well: every plot planted, every crop harvested on time. "
+                + "The garden is a success!";
+    }
+
+    // The text of the LOSE ending.
+    private String loseMessage() {
+        return "The 30 days are over. You earned $" + money(session.getBalance()) + " of the $"
+                + money(GameSession.GOAL) + " you needed.\n\n"
+                + "Better luck next time: keep every plot busy, harvest as soon as crops are ready, "
+                + "and try the crops that sell for more.";
+    }
+
+    // 10000 -> "10,000"
+    private static String money(int amount) {
+        return String.format("%,d", amount);
     }
 }

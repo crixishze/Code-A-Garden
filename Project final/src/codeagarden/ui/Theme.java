@@ -13,7 +13,7 @@ public final class Theme {
         // Constants only; no objects.
     }
 
-    // ---- wood and parchment (shop, inventory, story screens) ----
+    // ---- wood and parchment (shop, inventory, pop-ups) ----
     public static final Color WOOD_DARK = Color.decode("#5b3a1e");
     public static final Color WOOD_LIGHT = Color.decode("#a0713f");
     public static final Color PARCHMENT = Color.decode("#f3dfa2");
@@ -43,7 +43,7 @@ public final class Theme {
     private static final String DIALOG_FONT_PATH = "/fonts/DD.otf";
 
     // ---- fonts (use deriveFont(size) to get another size) ----
-    /** Monospaced bold font used by the shop, inventory and story screens. */
+    /** Monospaced bold font used by the shop, inventory and pop-up windows. */
     public static final Font PIXEL = new Font(Font.MONOSPACED, Font.BOLD, 16);
     /** Poppins Black: bottom bar balance, day counter and page buttons. */
     public static final Font HUD = Resources.loadFont(HUD_FONT_PATH, 18f);

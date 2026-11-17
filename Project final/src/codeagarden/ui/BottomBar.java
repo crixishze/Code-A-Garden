@@ -44,7 +44,7 @@ public class BottomBar extends JPanel {
     private Runnable onMenu;
     private double scale = 1.0;
 
-    /** Builds the bar: balance, day counter and the MENU button (page buttons are added later). */
+    /** Builds the bar: balance, day counter and the Menu button (page buttons are added later). */
     public BottomBar() {
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -62,7 +62,7 @@ public class BottomBar extends JPanel {
                 PICTURE_CAP, 0.62, "DAY 30 / 30", 26);
         add(centeredHolder(dayLabel), BorderLayout.CENTER);
 
-        // page buttons on the right; MENU is always the first one
+        // page buttons on the right; Menu is always the first one
         buttonLayout = new FlowLayout(FlowLayout.RIGHT, BUTTON_GAP, (BAR_HEIGHT - ELEMENT_HEIGHT) / 2);
         buttons = new JPanel(buttonLayout);
         buttons.setOpaque(false);
@@ -138,14 +138,14 @@ public class BottomBar extends JPanel {
         addButton(button);
     }
 
-    /** Sets what happens when the MENU button is pressed (GameScreen shows the save pop-up). */
+    /** Sets what happens when the Menu button is pressed (GameScreen shows the save pop-up). */
     public void setMenuAction(Runnable action) {
         onMenu = action;
     }
 
-    // The wooden MENU button, always first on the right.
+    // The wooden Menu button, always first on the right.
     private void addMenuButton() {
-        HudButton menu = new HudButton("MENU", menuButtonImage);
+        HudButton menu = new HudButton("Menu", menuButtonImage);
         menu.addActionListener(e -> {
             if (onMenu != null) {
                 onMenu.run();
