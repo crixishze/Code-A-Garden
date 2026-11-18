@@ -11,7 +11,7 @@ USE code_a_garden;
 
 -- ENTITY 1: PLAYER  (one row per player name; currency is what the leaderboard ranks)
 -- The password is never stored. We store a random salt and SHA-256(salt + password).
--- currency may go below 0 because some story choices cost money.
+-- currency is the player's money: it only goes up by harvesting and down by buying seeds.
 CREATE TABLE PLAYER (
     player_id     INT PRIMARY KEY AUTO_INCREMENT,
     player_name   VARCHAR(50) NOT NULL UNIQUE,
@@ -102,10 +102,10 @@ CREATE TABLE `SAVE` (
 
 -- CROP DATA (same numbers as SeedFactory.java)
 INSERT INTO CROP (crop_id, crop_name, cost, growth_time, reward) VALUES
-('00A', 'Carrot', 10, 3, 20),
-('00B', 'Corn', 20, 5, 45),
-('00C', 'Tomato', 30, 8, 70),
-('00D', 'Pumpkin', 50, 12, 120);
+('00A', 'Carrot', 10, 8, 20),
+('00B', 'Corn', 20, 12, 35),
+('00C', 'Tomato', 35, 20, 70),
+('00D', 'Pumpkin', 75, 35, 150);
 
 -- SAMPLE DATA: PLAYER (password for all: demo1234)
 INSERT INTO PLAYER (player_id, player_name, password_salt, password_hash, currency) VALUES
