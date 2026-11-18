@@ -25,13 +25,13 @@ public final class SeedFactory {
     public static Seed createSeed(String name) {
         switch (name) {
             case CARROT:
-                return new Seed(CARROT, 10, 3, 20);
+                return new Seed(CARROT, 10, 8, 20);
             case CORN:
-                return new Seed(CORN, 20, 5, 45);
+                return new Seed(CORN, 20, 12, 35);
             case TOMATO:
-                return new Seed(TOMATO, 30, 8, 70);
+                return new Seed(TOMATO, 35, 20, 70);
             case PUMPKIN:
-                return new Seed(PUMPKIN, 50, 12, 120);
+                return new Seed(PUMPKIN, 75, 35, 150);
             default:
                 throw new IllegalArgumentException("Unknown seed: " + name);
         }
