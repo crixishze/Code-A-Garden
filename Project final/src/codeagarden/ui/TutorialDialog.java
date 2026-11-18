@@ -67,10 +67,10 @@ final class TutorialDialog {
                 + "plant uses a seed from your Inventory, so buy seeds in the\n"
                 + "Shop first. Planting on a full plot does nothing.\n\n"
                 + "Crop     Cost   Grows   Sells\n"
-                + "Carrot   $10    3 s     $20\n"
-                + "Corn     $20    5 s     $45\n"
-                + "Tomato   $30    8 s     $70\n"
-                + "Pumpkin  $50    12 s    $120",
+                + "Carrot   $10    8 s     $20\n"
+                + "Corn     $20    12 s    $35\n"
+                + "Tomato   $35    20 s    $70\n"
+                + "Pumpkin  $75    35 s    $150",
 
         "int x = 0;                    makes a number variable\n"
                 + "if (canHarvest()) { ... }     does something only when true\n"
